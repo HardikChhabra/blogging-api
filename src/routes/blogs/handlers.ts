@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { db } from "../../db/index";
 import { blogs } from "../../db/schema";
 import { eq } from "drizzle-orm";
+
 //C
 export async function createBlog (req: Request, res: Response) {
     try {
-        const [newBlog] = await db.insert(blogs).values(req.body).returning();
+        const [newBlog] = await db.insert(blogs).values(req.cleanBody).returning();
         res.status(201).json(newBlog);
     } catch (error) {
         res.status(500).send(error);
@@ -27,7 +28,7 @@ export async function readBlogById (req: Request, res: Response) {
 }
 export async function readBlogByUser (req: Request, res: Response) {
     try{
-        const allBlogs = await db.select().from(blogs).where(eq(blogs.userId, req.body.userId));
+        const allBlogs = await db.select().from(blogs).where(eq(blogs.userId, req.cleanBody.userId));
         if(allBlogs.length == 0){
             res.status(204)
         } else {
@@ -39,7 +40,7 @@ export async function readBlogByUser (req: Request, res: Response) {
 }
 export async function readBlogByTitle (req: Request, res: Response) {
     try{
-        const allBlogs = await db.select().from(blogs).where(eq(blogs.title, req.body.title));
+        const allBlogs = await db.select().from(blogs).where(eq(blogs.title, req.cleanBody.title));
         if(allBlogs.length == 0){
             res.status(204)
         } else {
@@ -67,7 +68,7 @@ export async function readBlogByRange (req: Request, res: Response) {
 //U
 export async function updateBlogById (req: Request, res: Response) {
     try{
-        const updatedFeilds = req.body;
+        const updatedFeilds = req.cleanBody;
         const [updatedBlog] = await db.update(blogs).set(updatedFeilds).where(eq(blogs.blogId, req.params.id));
         if(!updatedBlog){
             res.status(404).send({message: "Blog not found"})

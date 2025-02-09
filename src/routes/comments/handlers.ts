@@ -60,7 +60,7 @@ export async function deleteComment (req: Request, res: Response) {
     try{
         const [deletedComment] = await db.delete(comments).where(eq(comments.commentId, req.params.id));
         if(!deletedComment){
-            res.status(404).send({message: "Either blog not found or User not found"})
+            res.status(404).send({message: "Comment not found."})
         } else {
             res.status(204).json(deletedComment);
         }

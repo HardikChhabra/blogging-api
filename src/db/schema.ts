@@ -1,5 +1,6 @@
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 // Users Table
 export const users = pgTable("users", {
@@ -7,7 +8,7 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
 });
 
-// Blogs Table
+// Blogs Table and zod schema
 export const blogs = pgTable("blogs", {
   blogId: uuid("blog_id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -15,14 +16,32 @@ export const blogs = pgTable("blogs", {
   content: text("content").notNull(),
   userId: text("user_id").references(() => users.email, { onDelete: "cascade" }),
 });
+export const createBlogSchema = createInsertSchema(blogs).omit({
+  blogId: true
+});
+export const updateBlogSchema = createInsertSchema(blogs).omit({
+  blogId: true
+}).partial();
+export const readBlogByUserSchema = createSelectSchema(blogs).pick({
+  userId: true
+});
+export const readBlogByTitleSchema = createSelectSchema(blogs).pick({
+  title: true
+});
 
-// Comments Table
+// Comments Table and zod schema
 export const comments = pgTable("comments", {
   commentId: uuid("comment_id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   content: text("content").notNull(),
   userId: text("user_id").references(() => users.email, { onDelete: "cascade" }),
   blogId: uuid("blog_id").references(() => blogs.blogId, { onDelete: "cascade" }),
+});
+export const createCommentSchema = createInsertSchema(comments).omit({
+  commentId: true
+});
+export const updateCommentSchema = createInsertSchema(comments).pick({
+  content: true
 });
 
 // Relations
