@@ -15,10 +15,11 @@ import {
   readBlogByUserSchema,
   updateBlogSchema,
 } from "../../db/schema";
+import { verifyToken } from "../../middleware/authMiddleware";
 
 const router = Router();
 //C
-router.post("/", validateData(createBlogSchema), createBlog);
+router.post("/", verifyToken, validateData(createBlogSchema), createBlog);
 
 //R
 router.get("/page", readBlogByRange);
@@ -31,9 +32,9 @@ router.post(
 );
 
 //U
-router.put("/:id", validateData(updateBlogSchema), updateBlogById);
+router.put("/:id", verifyToken, validateData(updateBlogSchema), updateBlogById);
 
 //D
-router.delete("/:id", deleteBlogById);
+router.delete("/:id", verifyToken, deleteBlogById);
 
 export default router;

@@ -6,7 +6,11 @@ import { eq } from "drizzle-orm";
 //C
 export async function createBlog(req: Request, res: Response) {
   try {
-    const [newBlog] = await db.insert(blogs).values(req.cleanBody).returning();
+    const userId = req.userId;
+    const [newBlog] = await db
+      .insert(blogs)
+      .values({ ...req.cleanBody, userId })
+      .returning();
     res.status(201).json(newBlog);
   } catch (error) {
     res.status(500).send(error);
@@ -78,10 +82,21 @@ export async function readBlogByRange(req: Request, res: Response) {
 export async function updateBlogById(req: Request, res: Response) {
   try {
     const updatedFeilds = req.cleanBody;
+    const [user] = await db
+      .select({
+        userId: blogs.userId,
+      })
+      .from(blogs)
+      .where(eq(blogs.blogId, req.params.id));
+    if (user.userId != req.userId) {
+      res.status(401).json({ error: "Not Autherized!" });
+      return;
+    }
     const [updatedBlog] = await db
       .update(blogs)
       .set(updatedFeilds)
-      .where(eq(blogs.blogId, req.params.id));
+      .where(eq(blogs.blogId, req.params.id))
+      .returning();
     if (!updatedBlog) {
       res.status(404).send({ message: "Blog not found" });
     } else {
@@ -95,6 +110,16 @@ export async function updateBlogById(req: Request, res: Response) {
 //D
 export async function deleteBlogById(req: Request, res: Response) {
   try {
+    const [user] = await db
+      .select({
+        userId: blogs.userId,
+      })
+      .from(blogs)
+      .where(eq(blogs.blogId, req.params.id));
+    if (user.userId != req.userId) {
+      res.status(401).json({ error: "Not Autherized!" });
+      return;
+    }
     const [deletedBlog] = await db
       .delete(blogs)
       .where(eq(blogs.blogId, req.params.id))

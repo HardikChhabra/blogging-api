@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
 import { db } from "../../db/index";
-import { blogs, comments, users } from "../../db/schema";
-import { and, eq } from "drizzle-orm";
+import { comments } from "../../db/schema";
+import { eq } from "drizzle-orm";
+
 //C
 export async function createComment(req: Request, res: Response) {
   try {
-    const [newComment] = await db.insert(blogs).values(req.body).returning();
+    const userId = req.userId;
+    const [newComment] = await db
+      .insert(comments)
+      .values({ ...req.cleanBody, userId })
+      .returning();
     res.status(201).json(newComment);
   } catch (error) {
     res.status(500).send(error);
@@ -49,18 +54,26 @@ export async function readCommentsByUser(req: Request, res: Response) {
 //U
 export async function updateComment(req: Request, res: Response) {
   try {
-    const updatedFeilds = req.body;
+    const updatedFeilds = req.cleanBody;
+    const [user] = await db
+      .select({
+        userId: comments.userId,
+      })
+      .from(comments)
+      .where(eq(comments.commentId, req.params.id));
+    if (!user) {
+      res.status(404).send({ message: "Comment not found." });
+      return;
+    }
+    if (user.userId != req.userId) {
+      res.status(401).json({ error: "Not Autherized!" });
+      return;
+    }
     const [updatedComment] = await db
       .update(comments)
       .set(updatedFeilds)
       .where(eq(comments.commentId, req.params.id));
-    if (!updatedComment) {
-      res
-        .status(404)
-        .send({ message: "Either blog not found or User not found" });
-    } else {
-      res.status(200).json(updatedComment);
-    }
+    res.status(200).json(updatedComment);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -69,14 +82,24 @@ export async function updateComment(req: Request, res: Response) {
 //D
 export async function deleteComment(req: Request, res: Response) {
   try {
+    const [user] = await db
+      .select({
+        userId: comments.userId,
+      })
+      .from(comments)
+      .where(eq(comments.commentId, req.params.id));
+    if (!user) {
+      res.status(404).send({ message: "Comment not found." });
+      return;
+    }
+    if (user.userId != req.userId) {
+      res.status(401).json({ error: "Not Autherized!" });
+      return;
+    }
     const [deletedComment] = await db
       .delete(comments)
       .where(eq(comments.commentId, req.params.id));
-    if (!deletedComment) {
-      res.status(404).send({ message: "Comment not found." });
-    } else {
-      res.status(204).json(deletedComment);
-    }
+    res.status(204).json(deletedComment);
   } catch (error) {
     res.status(500).send(error);
   }

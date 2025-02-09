@@ -8,19 +8,25 @@ import {
 } from "./handlers";
 import { validateData } from "../../middleware/validationMiddleware";
 import { createCommentSchema, updateCommentSchema } from "../../db/schema";
+import { verifyToken } from "../../middleware/authMiddleware";
 
 const router = Router();
 //C
-router.post("/", validateData(createCommentSchema), createComment);
+router.post("/", verifyToken, validateData(createCommentSchema), createComment);
 
 //R
 router.get("/blog/:id", readCommentsByBlog);
 router.get("/user/:id", readCommentsByUser);
 
 //U
-router.put("/:id", validateData(updateCommentSchema), updateComment);
+router.put(
+  "/:id",
+  verifyToken,
+  validateData(updateCommentSchema),
+  updateComment
+);
 
 //D
-router.delete("/:id", deleteComment);
+router.delete("/:id", verifyToken, deleteComment);
 
 export default router;

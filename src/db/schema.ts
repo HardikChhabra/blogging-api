@@ -2,11 +2,16 @@ import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-// Users Table
+// Users Table and zod schema
 export const users = pgTable("users", {
   email: text("email").primaryKey(),
   name: text("name").notNull(),
   password: text("pwd").notNull(),
+});
+export const createUserSchema = createInsertSchema(users);
+export const loginSchema = createInsertSchema(users).pick({
+  email: true,
+  password: true,
 });
 
 // Blogs Table and zod schema
@@ -15,16 +20,22 @@ export const blogs = pgTable("blogs", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  userId: text("user_id").references(() => users.email, {
-    onDelete: "cascade",
-  }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.email, {
+      onDelete: "cascade",
+    }),
 });
 export const createBlogSchema = createInsertSchema(blogs).omit({
   blogId: true,
+  userId: true,
+  createdAt: true,
 });
 export const updateBlogSchema = createInsertSchema(blogs)
   .omit({
     blogId: true,
+    userId: true,
+    createdAt: true,
   })
   .partial();
 export const readBlogByUserSchema = createSelectSchema(blogs).pick({
@@ -39,15 +50,21 @@ export const comments = pgTable("comments", {
   commentId: uuid("comment_id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   content: text("content").notNull(),
-  userId: text("user_id").references(() => users.email, {
-    onDelete: "cascade",
-  }),
-  blogId: uuid("blog_id").references(() => blogs.blogId, {
-    onDelete: "cascade",
-  }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.email, {
+      onDelete: "cascade",
+    }),
+  blogId: uuid("blog_id")
+    .notNull()
+    .references(() => blogs.blogId, {
+      onDelete: "cascade",
+    }),
 });
 export const createCommentSchema = createInsertSchema(comments).omit({
   commentId: true,
+  userId: true,
+  createdAt: true,
 });
 export const updateCommentSchema = createInsertSchema(comments).pick({
   content: true,
