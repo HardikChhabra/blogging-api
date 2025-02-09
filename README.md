@@ -1,122 +1,79 @@
-Blogging API
 
-To Use:
+# Blogging-API
 
-1. Clone to your server.
-2. Create a .env file with two variables: 'DATABASE_URL' and 'JWT_SECRET'.
-3. Database URL is your database's secret URL. JWT secret can be any string you want.
-4. In terminal, 'npm i' -> 'npx drizzle-kit generate' -> 'npx drizzle-kit migrate' to get your database ready.
-5. To start the API server, 'npm run dev'.
-6. Endpoints:
+An API to create an authenticated blogging application, where users can create blogs, look them up, comment over them and if anything goes wrong, delete them too.
 
--- /auth
 
-<register>
---- /register 
----- POST req.
----- req.body should have 'email', 'name', 'password'.
----- returns token.
----- put token in header -> Authorization.
+## Environment Variables
 
-<login>
---- /login 
----- POST req.
----- req.body should have 'email', 'password'.
----- returns token.
----- put token in header -> Authorization.
+To run this project, you will need to add the following environment variables to your .env file.
 
--- /blog
+`DATABASE_URL` Secret url to your database.
 
-<create>
---- /
----- POST req.
----- req.body should have 'content', 'title'.
----- returns json of newBlog.
----- userId is taken from header token.
----- auth required
+`JWT_SECRET` Secret string key.
 
-<read page>
---- /page?limit={limit}&offset={offset}
----- GET req.
----- req.params should have 'limit', 'offset'.
----- default 'limit' = 100, 'offset' = 0.
----- returns array of json of all blogs after the offset and within limit.
----- no auth required.
 
-<read single>
---- /{id}
----- GET req.
----- id should be a valid UUID of the blog to be read.
----- returns json of blog if found else status 204.
----- no auth required.
+## Run Locally
 
-<read by user>
---- /search/user
----- POST req.
----- req.body should have 'userId'.
----- returns array of json of all blogs of user if found else status 204.
----- no auth required.
+Clone the project
 
-<read by title>
---- /search/title
----- POST req.
----- req.body should have 'title'.
----- returns array of json of all blogs of same title if found else status 204.
----- no auth required.
+```bash
+  git clone https://github.com/HardikChhabra/blogging-api.git
+```
 
-<update>
---- /{id}
----- PUT req.
----- req.body can have feilds 'title', 'content'.
----- id should be a valid UUID of the blog to be updated.
----- user should be the one who created the blog else status 401
----- returns json of updated blog if blog and user found else status 404.
----- auth required.
+Go to the project directory
 
-<delete>
---- /{id}
----- DELETE req.
----- id should be a valid UUID of the blog to be deleted.
----- user should be the one who created the blog else status 401
----- returns status 204 if deleted else status 404.
----- auth required.
+```bash
+  cd blogging-api
+```
+`Make sure you have the .env file`
 
---/comment
-<create>
---- /
----- POST req.
----- req.body should have 'content', 'blogId'.
----- returns json of newComment.
----- userId is taken from header token.
----- auth required
+Install dependencies
 
-<read by blog>
---- /blog/{id}
----- GET req.
----- id should be a valid UUID of the blog whose comments are to be read.
----- returns array of json of all comments if found else status 204.
----- no auth required.
+```bash
+  npm install
+```
 
-<read by user>
---- /blog/{id}
----- GET req.
----- id should be a valid UUID of the user whose comments are to be read.
----- returns array of json of all comments of user if found else status 204.
----- no auth required.
+Generate and Migrate to your database
+```bash
+  npm drizzle-kit generate
+  npm drizzle-kit migrate
+```
+Start the server
 
-<update>
---- /{id}
----- PUT req.
----- req.body can have feilds 'content'.
----- id should be a valid UUID of the comment to be updated.
----- user should be the one who created the comment else status 401
----- returns json of updated comment if comment and user found else status 404.
----- auth required.
+```bash
+  npm run dev
+```
 
-<delete>
---- /{id}
----- DELETE req.
----- id should be a valid UUID of the comment to be deleted.
----- user should be the one who created the blog else status 401
----- returns status 204 if deleted else status 404.
----- auth required.
+# API Endpoints
+
+## Authentication
+
+| Endpoint      | Method | Body Parameters                 | Auth Required | Response                  |
+|--------------|--------|--------------------------------|--------------|---------------------------|
+| `/auth/register` | POST   | `email`, `name`, `password`  | No           | Returns token             |
+| `/auth/login`    | POST   | `email`, `password`         | No           | Returns token             |
+
+Put the token in `header` -> `key:Authorization, value:token`
+## Blog
+
+| Endpoint                 | Method | Body Parameters        | Query Params                   | Auth Required | Response                         |
+|--------------------------|--------|------------------------|--------------------------------|--------------|----------------------------------|
+| `/blog/`                 | POST   | `content`, `title`     | None                           | Yes          | Returns new blog JSON           |
+| `/blog/page`             | GET    | None                   | `limit` (default: 100), `offset` (default: 0) | No | Returns array of blogs          |
+| `/blog/{id}`             | GET    | None                   | None                           | No           | Returns blog JSON or status 204 |
+| `/blog/search/user`      | POST   | `userId`               | None                           | No           | Returns user's blogs or status 204 |
+| `/blog/search/title`     | POST   | `title`                | None                           | No           | Returns blogs with title or status 204 |
+| `/blog/{id}`             | PUT    | `title`, `content`     | None                           | Yes          | Returns updated blog JSON or status 404 |
+| `/blog/{id}`             | DELETE | None                   | None                           | Yes          | Returns status 204 or status 404 |
+
+## Comments
+
+| Endpoint                 | Method | Body Parameters  | Auth Required | Response                          |
+|--------------------------|--------|-----------------|--------------|-----------------------------------|
+| `/comment/`             | POST   | `content`, `blogId` | Yes          | Returns new comment JSON         |
+| `/comment/blog/{id}`    | GET    | None            | No           | Returns blog's comments or status 204 |
+| `/comment/user/{id}`    | GET    | None            | No           | Returns user's comments or status 204 |
+| `/comment/{id}`         | PUT    | `content`       | Yes          | Returns updated comment JSON or status 404 |
+| `/comment/{id}`         | DELETE | None            | Yes          | Returns status 204 or status 404 |
+
