@@ -126,6 +126,10 @@ export async function deleteBlogById(req: Request, res: Response) {
       })
       .from(blogs)
       .where(eq(blogs.blogId, req.params.id));
+    if (!user) {
+      res.status(404).json({ error: "Blog not found" });
+      return;
+    }
     if (user.userId != req.userId) {
       res.status(401).json({ error: "Not Autherized!" });
       return;

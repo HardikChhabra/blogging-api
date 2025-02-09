@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { object } from "zod";
 
 export function verifyToken(req: Request, res: Response, next: NextFunction) {
   const token = req.header("Authorization");
