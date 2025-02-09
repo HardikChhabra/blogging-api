@@ -18,7 +18,14 @@ router.post(
 
       const [createdUser] = await db.insert(users).values(data).returning();
       createdUser.password = "";
-      res.status(201).json(createdUser);
+      const token = jwt.sign(
+        { userId: createdUser.email },
+        process.env.JWT_SECRET!,
+        {
+          expiresIn: "12h",
+        }
+      );
+      res.status(201).json({ message: "User registered", token });
     } catch (error) {
       res.status(500).json({ message: "Something went wrong." });
     }

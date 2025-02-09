@@ -65,8 +65,18 @@ export async function readBlogByTitle(req: Request, res: Response) {
 }
 export async function readBlogByRange(req: Request, res: Response) {
   try {
-    const limit = Number(req.query.limit);
-    const offset = Number(req.query.offset);
+    let limit: number;
+    if (req.query.limit) {
+      limit = Number(req.query.limit);
+    } else {
+      limit = 100;
+    }
+    let offset: number;
+    if (req.query.offset) {
+      offset = Number(req.query.offset);
+    } else {
+      offset = 0;
+    }
     const page = await db.select().from(blogs).limit(limit).offset(offset);
     if (page.length == 0) {
       res.status(204);
