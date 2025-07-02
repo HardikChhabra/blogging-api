@@ -5,10 +5,10 @@ import {
   deleteComment,
   readCommentsByBlog,
   readCommentsByUser,
-} from "./handlers";
-import { validateData } from "../../middleware/validationMiddleware";
-import { createCommentSchema, updateCommentSchema } from "../../db/schema";
-import { verifyToken } from "../../middleware/authMiddleware";
+} from "./handlers.js";
+import { validateData } from "../../middleware/validationMiddleware.js";
+import { createCommentSchema, updateCommentSchema } from "../../db/schema.js";
+import { verifyToken } from "../../middleware/authMiddleware.js";
 
 const router = Router();
 //C
