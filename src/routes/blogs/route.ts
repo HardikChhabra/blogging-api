@@ -7,15 +7,15 @@ import {
   readBlogByTitle,
   readBlogByUser,
   updateBlogById,
-} from "./handlers";
-import { validateData } from "../../middleware/validationMiddleware";
+} from "./handlers.js";
+import { validateData } from "../../middleware/validationMiddleware.js";
 import {
   createBlogSchema,
   readBlogByTitleSchema,
   readBlogByUserSchema,
   updateBlogSchema,
-} from "../../db/schema";
-import { verifyToken } from "../../middleware/authMiddleware";
+} from "../../db/schema.js";
+import { verifyToken } from "../../middleware/authMiddleware.js";
 
 const router = Router();
 //C
