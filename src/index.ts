@@ -71,8 +71,8 @@ app.use("/auth", authRouter);
 app.use("/blog", blogRouter);
 app.use("/comment", commentRouter);
 
-/* app.listen(port, () => {
+app.listen(port, () => {
   console.log("Listening to port:", port);
-}); */
+});
 
-export default app;
+/* export default app; */

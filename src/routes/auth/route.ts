@@ -15,17 +15,24 @@ router.post(
     try {
       const data = req.cleanBody;
       data.password = await bcrypt.hash(data.password, 10);
-
-      const [createdUser] = await db.insert(users).values(data).returning();
-      createdUser.password = "";
-      const token = jwt.sign(
-        { userId: createdUser.email },
-        process.env.JWT_SECRET!,
-        {
-          expiresIn: "12h",
-        }
-      );
-      res.status(201).json({ message: "User registered", token });
+      const checkUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, data.email));
+      if (checkUser) {
+        res.status(400).json({ error: "User Already Exists!" });
+      } else {
+        const [createdUser] = await db.insert(users).values(data).returning();
+        createdUser.password = "";
+        const token = jwt.sign(
+          { userId: createdUser.email },
+          process.env.JWT_SECRET!,
+          {
+            expiresIn: "12h",
+          }
+        );
+        res.status(201).json({ message: "User registered", token });
+      }
     } catch (error) {
       res.status(500).json({ message: "Something went wrong." });
     }
